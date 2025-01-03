@@ -1,0 +1,38 @@
+{
+    "python.envFile": "${workspaceFolder}/.env",
+    "editor.snippetSuggestions": "top",
+    "python.analysis.extraPaths": [
+        "/Users/troy/Develop/gly.fish/pymc"
+    ],
+    "cSpell.words": [
+        "acov",
+        "arange",
+        "Autoregression",
+        "boxstyle",
+        "buyprice",
+        "cumu",
+        "dtopen",
+        "edgecolor",
+        "evec",
+        "facecolor",
+        "fbar",
+        "fontsize",
+        "issell",
+        "Johansen",
+        "kron",
+        "ncol",
+        "nforecast",
+        "nlags",
+        "nonposy",
+        "pnlminus",
+        "smax",
+        "statsmodels",
+        "strats",
+        "tasymp",
+        "XYLOG",
+        "ylimit",
+        "yscale",
+        "yticks",
+        "zorder"
+    ]
+}
