@@ -48,6 +48,66 @@ MCMC is a computational method for approximating complex probability distributio
 
 PyMC is a powerful tool for Bayesian modeling, abstracting the complexities of MCMC while providing flexibility for advanced users.
   
+## Output of `arviz.summary`
+
+The `arviz.summary` function generates a tabular summary of the posterior distribution of parameters from a Bayesian model. This summary provides key statistical metrics to interpret the results of an MCMC sampling process. Below is an explanation of the main components typically included in the output:
+
+### **Columns in `arviz.summary`**
+
+1. **mean**:
+   - The posterior mean (average) of the samples for each parameter.
+   - Represents the central tendency of the parameter's posterior distribution.
+
+2. **sd**:
+   - The standard deviation of the posterior samples for each parameter.
+   - Quantifies the uncertainty or variability in the parameter estimates.
+
+3. **hdi_3%** and **hdi_97%** (or other HDI bounds):
+   - The bounds of the 94% (default) *Highest Density Interval* (HDI).
+   - The HDI (High Density Interval) is an interval within which the true parameter value lies with the specified probability (e.g., 94%), representing the range of most credible values.
+
+4. **mcse_mean**:
+   - Monte Carlo Standard Error (MCSE) for the mean.
+   - Indicates the uncertainty in the mean estimate due to finite sampling.
+
+5. **mcse_sd**:
+   - MCSE for the standard deviation.
+   - Represents the uncertainty in the standard deviation estimate due to finite sampling.
+
+6. **ess_bulk**:
+   - Effective Sample Size (bulk).
+   - Measures the effective number of independent samples for the bulk of the distribution.
+   - A high ESS indicates good sampling efficiency and low autocorrelation.
+
+7. **ess_tail**:
+   - Effective Sample Size (tail).
+   - Focuses on the tail of the distribution and assesses the number of effective independent samples there.
+
+8. **r_hat**:
+   - The Gelman-Rubin convergence diagnostic (R-hat).
+   - Values close to 1 indicate good convergence of the MCMC chains. Values significantly above 1 suggest the chains have not mixed well and may need more iterations.
+
+### **Interpreting the Output**
+
+- **Central Tendency (Mean)**: Use the `mean` to interpret the "average" value of the parameter.
+- **Uncertainty (SD and HDI)**: The `sd` and `hdi_x%` provide a sense of the variability and credible intervals for the parameter estimates.
+- **Convergence (R-hat)**: Check that `r_hat` is close to 1 for all parameters to ensure the MCMC chains have converged.
+- **Sampling Efficiency (ESS)**: Ensure that `ess_bulk` and `ess_tail` are sufficiently large for reliable inference.
+
+### **Example Table**
+
+| Parameter  | mean  | sd   | hdi_3% | hdi_97% | mcse_mean | mcse_sd | ess_bulk | ess_tail | r_hat |
+|------------|-------|------|--------|---------|-----------|---------|----------|----------|-------|
+| alpha      | 1.23  | 0.12 | 1.01   | 1.45    | 0.01      | 0.002   | 1000     | 950      | 1.00  |
+| beta       | -0.45 | 0.09 | -0.62  | -0.28   | 0.01      | 0.001   | 950      | 930      | 1.01  |
+
+This table shows the posterior mean, variability, credible intervals, and diagnostics for two parameters, `alpha` and `beta`.
+
+#### **Use in Practice**
+
+The `arviz.summary` output helps assess the quality of the MCMC sampling (via diagnostics like `ess` and `r_hat`) and provides an intuitive summary of the posterior distributions for interpreting model results.
+
+
 ## arvis plots
 
 ### Output of `arviz.plot_trace`
@@ -260,6 +320,123 @@ The **Savage-Dickey Density Ratio** is a powerful tool for Bayesian hypothesis t
   - **`BF01`**: Bayes Factor in favor of \( H_0 \) over \( H_1 \).
 
 - **`axes`**: Matplotlib Axes or Bokeh Figure object containing the plot.
+
+### **`arviz.plot_pair`**
+
+The `plot_pair` function in ArviZ creates pair plots (scatter plot matrices) to visualize relationships between multiple variables. It is commonly used to examine joint distributions and correlations between variables in Bayesian inference results.
+
+#### **Function Signature**
+
+``` python
+arviz.plot_pair(
+    data,
+    group='posterior',
+    var_names=None,
+    filter_vars=None,
+    combine_dims=None,
+    coords=None,
+    marginals=False,
+    figsize=None,
+    textsize=None,
+    kind='scatter',
+    gridsize='auto',
+    divergences=False,
+    colorbar=False,
+    labeller=None,
+    ax=None,
+    divergences_kwargs=None,
+    scatter_kwargs=None,
+    kde_kwargs=None,
+    hexbin_kwargs=None,
+    backend=None,
+    backend_kwargs=None,
+    marginal_kwargs=None,
+    point_estimate=None,
+    point_estimate_kwargs=None,
+    point_estimate_marker_kwargs=None,
+    reference_values=None,
+    reference_values_kwargs=None,
+    show=None
+)
+```
+
+#### **Parameters**
+
+##### **Required**
+
+- **data** (*InferenceData or object convertible to InferenceData*):  
+  The data to plot, typically posterior samples from Bayesian models.
+
+##### **Optional**
+
+- **group** (*str, default='posterior'*):  
+  Specifies the InferenceData group to visualize. Examples include `'posterior'`, `'prior'`.
+
+- **var_names** (*list of str, optional*):  
+  Variables to include in the plot. If `None`, all variables are included. Variables prefixed with `~` are excluded.
+
+- **filter_vars** (*{None, "like", "regex"}, optional*):  
+  Determines how var_names is interpreted:  
+  - None: Interpreted as exact variable names.  
+  - "like": Matches variable names that contain the specified substring(s).  
+  - "regex": Matches variable names using regular expressions.
+
+- **combine_dims** (*set-like of str, optional*):  
+  Specifies dimensions to combine. Defaults to combining "chain" and "draw" dimensions.
+
+- **coords** (*dict, optional*):  
+  Dictionary specifying subsets of var_names to include.
+
+- **marginals** (*bool, default=False*):  
+  Whether to include marginal distributions on the diagonal of the pair plot.
+
+- **figsize** (*tuple, optional*):  
+  Sets the figure size. Defaults to (8 + numvars, 8 + numvars).
+
+- **textsize** (*float, optional*):  
+  Scales text size for labels and titles.
+
+- **kind** (*str or list of str, default='scatter'*):  
+  Specifies the type of plot for the off-diagonal subplots:  
+  - 'scatter': Scatter plot.  
+  - 'kde': Kernel Density Estimate plot.  
+  - 'hexbin': Hexagonal binning.
+
+- **gridsize** (*int or 'auto', default='auto'*):  
+  Number of hexagons along the x-axis if using `'hexbin'`.
+
+- **divergences** (*bool, default=False*):  
+  Whether to highlight divergent samples.
+
+- **colorbar** (*bool, default=False*):  
+  Whether to include a colorbar for `'hexbin'` plots.
+
+- **labeller** (*Labeller, optional*):  
+  Custom labeller for variable names.
+
+- **ax** (*array-like of matplotlib axes, optional*):  
+  Pre-existing axes to plot on.
+
+- **divergences_kwargs**, **scatter_kwargs**, **kde_kwargs**, **hexbin_kwargs** (*dict, optional*):  
+  Additional keyword arguments passed to specific plot types.
+
+- **backend** (*str, optional*):  
+  Specifies the plotting backend ('matplotlib' or 'bokeh').
+
+- **backend_kwargs** (*dict, optional*):  
+  Additional keyword arguments for the backend.
+
+- **marginal_kwargs** (*dict, optional*):  
+  Additional arguments for marginal plots.
+
+- **point_estimate** (*str, optional*):  
+  Type of point estimate to display (e.g., `'mean'`, `'median'`).
+
+- **reference_values** (*dict, optional*):  
+  Reference values for variables to overlay on the plot.
+
+- **show** (*bool, optional*):  
+  Whether to display the plot immediately.
 
 ## Loss Functions
 
