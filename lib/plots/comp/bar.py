@@ -51,6 +51,81 @@ def bar(axis: pyplot.axis, y: numpy.ndarray[float], x: numpy.ndarray=None, **kwa
     __plot_bar(axis, x, y, 0, **kwargs)
 
 
+def bar_comparison(axis: pyplot.axis, y: numpy.ndarray[float], y_curve: numpy.ndarray[float], x: numpy.ndarray=None, x_curve: numpy.ndarray=None, **kwargs):
+    """
+    Plot samples in a bar chart.
+
+    Parameters
+    ----------
+    axis : matplotlib.pyplot.axis
+        Axis used to draw plot.
+    y : numpy.ndarray[float]
+        Value plotted on y-axis.
+    y_curve: numpy.ndarray[float]
+        Curve to plot.
+    x : numpy.ndarray
+        Value plotted in x axis (default use y index)
+    x_curve : numpy.ndarray
+        Value plotted in x axis for curve (default use y_curve index)
+    title : string, optional
+        Plot title (default is None)
+    title_offset : float (default is 0.0)
+        Plot title off set from top of plot.
+    xlabel : string, optional
+        Plot x-axis label (default is 'x')
+    ylabel : string, optional
+        Plot y-axis label (default is 'y')
+    alpha : float
+        Bar alpha (default 0.5)
+    border_width : float
+        Bar border width (default)
+    bar_width : float
+        Bar width ras faction of x delta.
+    xlim : (float, float)
+        Specify the limits for the x axis. (default None)
+    ylim : (float, float)
+        Specify the limits for the y axis. (default None)
+    """
+
+    title          = get_param_default_if_missing("title", None, **kwargs)
+    title_offset   = get_param_default_if_missing("title_offset", 0.0, **kwargs)
+    xlabel         = get_param_default_if_missing("xlabel", "x", **kwargs)
+    ylabel         = get_param_default_if_missing("ylabel", "y", **kwargs)
+    xlim           = get_param_default_if_missing("xlim", None, **kwargs)
+    ylim           = get_param_default_if_missing("ylim", None, **kwargs)
+    legend_loc     = get_param_default_if_missing("legend_loc", "best", **kwargs)
+    labels         = get_param_default_if_missing("labels", None, **kwargs)
+    lw             = get_param_default_if_missing("lw", 2, **kwargs)
+
+    if title is not None:
+        axis.set_title(title, y=title_offset + 1.0)
+
+    if isinstance(x[0], pandas.Timestamp) or isinstance(x[0], datetime):
+        converter = mdates.ConciseDateConverter()
+        munits.registry[numpy.datetime64] = converter
+        munits.registry[date] = converter
+        munits.registry[datetime] = converter
+
+    if x is None:
+        x = numpy.arange(len(y))
+
+    if xlim is not None:
+        axis.set_xlim(xlim)
+    if ylim is not None:
+        axis.set_ylim(ylim)
+
+    axis.set_ylabel(ylabel)
+    axis.set_xlabel(xlabel)
+
+    __plot_bar(axis, x, y, 0, **kwargs)
+    label = labels[1] if labels is not None else None
+    
+    axis.plot(x_curve, y_curve, lw=lw, zorder=10, label=label)
+
+    if labels is not None:
+        axis.legend(loc=legend_loc, bbox_to_anchor=(0.1, 0.1, 0.9, 0.9))
+
+
 def positive_negative_bar(axis: pyplot.axis, y: numpy.ndarray[float], x: numpy.ndarray=None, **kwargs):
     """
     Plot data in a bar chart with different colors for positive and negative values.

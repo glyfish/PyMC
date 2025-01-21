@@ -785,4 +785,3 @@ def positive_negative_bar(y: numpy.ndarray[float], x: numpy.ndarray=None, **kwar
     _, axis = pyplot.subplots(figsize=figsize)
     comp.positive_negative_bar(axis, y, x, **kwargs)
 
-
