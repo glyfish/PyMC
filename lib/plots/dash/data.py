@@ -3,7 +3,7 @@ from matplotlib import pyplot
 
 from lib.utils import get_param_default_if_missing
 from lib.plots import comp
-from scipy.stats import gaussian_kde
+from scipy import stats
 
 
 def ridge_plot(cats, raw_data, **kwargs):
@@ -17,7 +17,9 @@ def ridge_plot(cats, raw_data, **kwargs):
     raw_data : numpy.ndarray[float]
         Data to plot.
     nbins : int
-        Number of bins for histogram.
+        Number of bins for histogram (default 10).
+    nkde : int
+        Number of points for KDE (default 50).
     title : string, optional
         Plot title (default is None)
     title_offset : float (default is 0.0)
@@ -36,6 +38,7 @@ def ridge_plot(cats, raw_data, **kwargs):
 
     figsize = get_param_default_if_missing("figsize", (10, 8), **kwargs)
     nbins = get_param_default_if_missing("nbins", 10, **kwargs)
+    nkde = get_param_default_if_missing("nkde", 50, **kwargs)
     xlabel = get_param_default_if_missing("xlabel", None, **kwargs)  
     title = get_param_default_if_missing("title", None, **kwargs)  
     title_offset = get_param_default_if_missing("title_offset", 0.0, **kwargs)
@@ -49,11 +52,13 @@ def ridge_plot(cats, raw_data, **kwargs):
     axis[0].set_title(title, y=1.0 + title_offset)
 
     for i in range(nplot):
-        kde = gaussian_kde(raw_data[i])
-        xkde = numpy.linspace(min(raw_data[i]), max(raw_data[i]), 100)
         hist, bins = numpy.histogram(raw_data[i], bins=nbins, range=(min_data, max_data), density=True)
-        hist = hist * (bins[-1] - bins[0]) / nbins
-        comp.bar_comparison(axis[i], hist, kde(xkde), bins[:-1], xkde, color='blue', alpha=0.5, xlabel=None)
+
+        gaussian_kde = stats.gaussian_kde(raw_data[i])
+        xkde = numpy.linspace(min(raw_data[i]), max(raw_data[i]), nkde)
+        kde = gaussian_kde(xkde)
+
+        comp.bar_comparison(axis[i], hist, kde, bins[:-1], xkde, color='blue', alpha=0.5, xlabel=None)
         axis[i].set_yticklabels([])
         axis[i].set_ylabel(cats[i], rotation=0)
 
